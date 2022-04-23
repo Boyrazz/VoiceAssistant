@@ -10,13 +10,43 @@ import os
 
 import getpass
 
+from playsound import playsound
+
+from gtts import gTTS
+
+from datetime import date, datetime
+
+import random
+
+from ctypes import cast,POINTER
+
+from comtypes import CLSCTX_ALL
+
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+
+
+devices = AudioUtilities.GetSpeakers()
+interface = devices.Activate(
+    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+volume = cast(interface, POINTER(IAudioEndpointVolume))
+
+
 
 r = sr.Recognizer()
 
-
+acilis = random.randint(0,1)
 
 kullanici_adi = (getpass.getuser())
 
+
+def speak(string):
+    tts = gTTS(text=string, lang="tr", slow=False)
+    file = "answer.mp3"
+    tts.save(file)
+    # speeding()
+    playsound(file)
+    os.remove(file)
+    # os.remove("speed.mp3")
 
 
 def record_audio(ask = False):
@@ -24,13 +54,16 @@ def record_audio(ask = False):
         if ask:
             print(ask)
         audio = r.listen(source)
+        voice_data = ""
         try:
             voice_data = r.recognize_google(audio, language="TR-tr")
-            print(voice_data)
         except sr.UnknownValueError:
-            print("Ses Algılanmadı")
+            print("Anlayamadım")
+            pass
         except sr.RequestError:
             print("Sistem Hatası")
+            pass
+        print(voice_data)
         return voice_data
 
 
@@ -38,19 +71,17 @@ def respond(voice_data):
     if "merhaba" in voice_data:
         print("Merhaba Efendim")
 
-
     if "internette ara" in voice_data:
-        kelime = record_audio("Ne aramak istiyorsunuz")
-        url = "https://www.google.com.tr/search?q=" + kelime
-        webbrowser.get().open(url)
-
-
-    if "kimdir" in voice_data:
-        kelime = voice_data.split("kimdir", maxsplit = 1)
-        oge = kelime[0]
+        kelime = voice_data.split("internette ara", maxsplit=1)
+        oge = kelime[1]
         url = "https://www.google.com.tr/search?q=" + oge
         webbrowser.get().open(url)
 
+    if "kimdir" in voice_data:
+        kelime = voice_data.split("kimdir", maxsplit =1)
+        oge = kelime[0]
+        url = "https://www.google.com.tr/search?q=" + oge
+        webbrowser.get().open(url)
 
     if "nerede" in voice_data:
         kelime = voice_data.split("nerede", maxsplit=1)
@@ -58,9 +89,8 @@ def respond(voice_data):
         url = "https://www.google.com.tr/maps/place/" + oge
         webbrowser.get().open(url)
 
-
-    if "YouTube" in voice_data:
-        kelime = voice_data.split("YouTube", maxsplit=1)
+    if "youtube" in voice_data:
+        kelime = voice_data.split("youtube", maxsplit=1)
         oge = kelime[1]
         url = "https://www.youtube.com/results?search_query=" + oge
         webbrowser.get().open(url)
@@ -68,8 +98,7 @@ def respond(voice_data):
         pyautogui.press('tab')
         pyautogui.press('enter')
 
-
-    if "Ekran görüntüsü al" in voice_data:
+    if "ekran görüntüsü al" in voice_data:
         ekran_goruntusu = pyautogui.screenshot()
         f = open("ekran_goruntusu_kayit.txt", "r")
         num = f.read()
@@ -87,7 +116,78 @@ def respond(voice_data):
         f.close()
         ekran_goruntusu.save(dosya_yolu)
 
-time.sleep(1)
-while 1:
-    voice_data = record_audio()
-    respond(voice_data)
+    if "hangi gündeyiz" in voice_data or "bugün günlerden ne" in voice_data:
+        today = time.strftime("%A")
+        today.capitalize()
+        if today == "Monday":
+            today = "Pazartesi"
+
+        elif today == "Tuesday":
+            today = "Salı"
+
+        elif today == "Wednesday":
+            today = "Çarşamba"
+
+        elif today == "Thursday":
+            today = "Perşembe"
+
+        elif today == "Friday":
+            today = "Cuma"
+
+        elif today == "Saturday":
+            today = "Cumartesi"
+
+        elif today == "Sunday":
+            today = "Pazar"
+
+        speak(today)
+
+    if "saat kaç" in voice_data:
+        selection = ["Saat şu an: ", "Hemen bakıyorum: "]
+        clock = datetime.now().strftime("%H:%M")
+        selection = random.choice(selection)
+        speak(selection + clock)
+
+    if "sesi ayarla" in voice_data:
+        kelime = voice_data.split("sesi ayarla",maxsplit=1)
+        oge = kelime[1]
+        oge = oge.rstrip()
+        print (oge)
+        if oge == " bir":
+            volume.SetMasterVolumeLevel(-50.0, None)
+        if oge == ' 2':
+            volume.SetMasterVolumeLevel(-20.0, None)
+        if oge == ' 3':
+            volume.SetMasterVolumeLevel(-10, None)
+        if oge == ' 4':
+            volume.SetMasterVolumeLevel(-0, None)
+
+    if "bilgisayarı kapat" in voice_data:
+        os.system("shutdown /s /t 1")
+        
+    if "pencereyi kapat" in voice_data:
+        pyautogui.hotkey('altleft','f4')
+        pyautogui.press('enter')
+
+    if "programı kapat" in voice_data:
+        playsound("shuttingdown.mp3")
+        exit()
+
+def test(wake):
+    if"ceviz" in wake:
+        playsound("DING.mp3")
+        wake = record_audio()
+        if wake != '':
+            voice_data = wake.lower()
+            respond(voice_data)
+
+if acilis == 1:
+    playsound("aktive.mp3")
+else:
+    playsound("geridonus.mp3")
+
+while True:
+    wake = record_audio()
+    if wake != '':
+        wake = wake.lower()
+        test(wake)
