@@ -36,13 +36,13 @@ volume = cast(interface, POINTER(IAudioEndpointVolume))
 
 r = sr.Recognizer()
 
-acilis = random.randint(0,1)
+opening_sound_chose = random.randint(0,1)
 
 kullanici_adi = (getpass.getuser())
 
 
-def speak(string):
-    tts = gTTS(text=string, lang="tr", slow=False)
+def speak(sening):
+    tts = gTTS(text=sening, lang="en", slow=False)
     file = "answer.mp3"
     tts.save(file)
     # speeding()
@@ -58,129 +58,108 @@ def record_audio(ask = False):
         audio = r.listen(source)
         voice_data = ""
         try:
-            voice_data = r.recognize_google(audio, language="TR-tr")
+            voice_data = r.recognize_google(audio, language="EN-en")
         except sr.UnknownValueError:
-            print("Anlayamadım")
+            print("I dont get it")
             pass
         except sr.RequestError:
-            print("Sistem Hatası")
+            print("System Failure")
             pass
         print(voice_data)
         return voice_data
 
 
 def respond(voice_data):
-    if "merhaba" in voice_data:
-        print("Merhaba Efendim")
+    if "Hello" in voice_data:
+        print("Hello Sir")
 
-    if "internette ara" in voice_data:
-        kelime = voice_data.split("internette ara", maxsplit=1)
-        oge = kelime[1]
-        url = "https://www.google.com.tr/search?q=" + oge
+    if "Search in web" in voice_data:
+        word = voice_data.split("search in web", maxsplit=1)
+        component = word[1]
+        url = "https://www.google.com/?hl=en" + component
         webbrowser.get().open(url)
 
-    if "kimdir" in voice_data:
-        kelime = voice_data.split("kimdir", maxsplit =1)
-        oge = kelime[0]
-        url = "https://www.google.com.tr/search?q=" + oge
+    if "who is" in voice_data:
+        word = voice_data.split("who is", maxsplit =1)
+        component = word[0]
+        url = "https://www.google.com/?hl=en" + component
         webbrowser.get().open(url)
 
-    if "nerede" in voice_data:
-        kelime = voice_data.split("nerede", maxsplit=1)
-        oge = kelime[0]
-        url = "https://www.google.com.tr/maps/place/" + oge
+    if "where is" in voice_data:
+        word = voice_data.split("where is", maxsplit=1)
+        component = word[0]
+        url = "https://www.google.com.en/maps/place/" + component
         webbrowser.get().open(url)
 
-    if "oynat" in voice_data:
-        kelime = voice_data.split("oynat", maxsplit=1)
-        oge = kelime[0]
-        pywhatkit.playonyt(oge)
+    if "play" in voice_data:
+        word = voice_data.split("play", maxsplit=1)
+        component = word[0]
+        pywhatkit.playonyt(component)
 
-    if "ekran görüntüsü al" in voice_data:
-        ekran_goruntusu = pyautogui.screenshot()
-        f = open("ekran_goruntusu_kayit.txt", "r")
+    if "take a screenshot" in voice_data:
+        take_ss = pyautogui.screenshot()
+        f = open("screen_record.txt", "r")
         num = f.read()
         f.close()
-        dosya_adi = "ekran_gorüntüsü" + num + ".jpg"
-        dosya_yolu1 = 'C:\\Users\ '
-        dosya_yolu1 = dosya_yolu1.rstrip()
-        dosya_yolu2 = '\Desktop'
-        dosya_yolu = os.path.join(dosya_yolu1 + kullanici_adi + dosya_yolu2, dosya_adi)
-        f = open("ekran_goruntusu_kayit.txt", "w")
+        file_name = "ss" + num + ".jpg"
+        file_path1 = 'C:\\Users\ '
+        file_path1 = file_path1.rstrip()
+        file_path2 = '\Desktop'
+        file_path = os.path.join(file_path1 + kullanici_adi + file_path2, file_name)
+        f = open("screen_record.txt", "w")
         con_num = int(num)
         con_num = con_num + 1
         con_num1 = str(con_num)
         f.write(con_num1)
         f.close()
-        ekran_goruntusu.save(dosya_yolu)
+        take_ss.save(file_path)
 
-    if "hangi gündeyiz" in voice_data or "bugün günlerden ne" in voice_data:
+    if "what day is today" in voice_data:
         today = time.strftime("%A")
         today.capitalize()
-        if today == "Monday":
-            today = "Pazartesi"
-
-        elif today == "Tuesday":
-            today = "Salı"
-
-        elif today == "Wednesday":
-            today = "Çarşamba"
-
-        elif today == "Thursday":
-            today = "Perşembe"
-
-        elif today == "Friday":
-            today = "Cuma"
-
-        elif today == "Saturday":
-            today = "Cumartesi"
-
-        elif today == "Sunday":
-            today = "Pazar"
-
         speak(today)
 
-    if "saat kaç" in voice_data:
-        selection = ["Saat şu an: ", "Hemen bakıyorum: "]
+    if "what time is it" in voice_data:
+        selection = ["The time is: ", "Let me look: "]
         clock = datetime.now().strftime("%H:%M")
         selection = random.choice(selection)
         speak(selection + clock)
 
-    if "sesi ayarla" in voice_data:
-        kelime = voice_data.split("sesi ayarla",maxsplit=1)
-        oge = kelime[1]
-        oge = oge.rstrip()
-        print (oge)
-        if oge == " bir":
+    if "adjut sound" in voice_data:
+        word = voice_data.split("adjut sound",maxsplit=1)
+        component = word[1]
+        component = component.rstrip()
+        print (component)
+        if component == " one":
             volume.SetMasterVolumeLevel(-50.0, None)
-        if oge == ' 2':
+        if component == ' 2':
             volume.SetMasterVolumeLevel(-20.0, None)
-        if oge == ' 3':
+        if component == ' 3':
             volume.SetMasterVolumeLevel(-10, None)
-        if oge == ' 4':
+        if component == ' 4':
             volume.SetMasterVolumeLevel(-0, None)
 
-    if "bilgisayarı kapat" in voice_data:
+    if "shutdown the computer" in voice_data:
         os.system("shutdown /s /t 1")
         
-    if "pencereyi kapat" in voice_data:
+    if "close the window" in voice_data:
         pyautogui.hotkey('altleft','f4')
         pyautogui.press('enter')
 
-    if "programı kapat" in voice_data:
+    if "close program" in voice_data:
         playsound("shuttingdown.mp3")
         exit()
 
 def test(wake):
-    if"ceviz" in wake:
+    if"jarvis" in wake:
         playsound("DING.mp3")
         wake = record_audio()
         if wake != '':
             voice_data = wake.lower()
             respond(voice_data)
 
-if acilis == 1:
-    playsound("aktive.mp3")
+if opening_sound_chose == 1:
+    playsound("activate_sound.mp3")
 else:
     playsound("geridonus.mp3")
 
