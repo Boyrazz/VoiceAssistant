@@ -1,5 +1,7 @@
 import time
 
+import pywhatkit
+
 import webbrowser
 
 import speech_recognition as sr
@@ -89,14 +91,10 @@ def respond(voice_data):
         url = "https://www.google.com.tr/maps/place/" + oge
         webbrowser.get().open(url)
 
-    if "youtube" in voice_data:
-        kelime = voice_data.split("youtube", maxsplit=1)
-        oge = kelime[1]
-        url = "https://www.youtube.com/results?search_query=" + oge
-        webbrowser.get().open(url)
-        time.sleep(5)
-        pyautogui.press('tab')
-        pyautogui.press('enter')
+    if "oynat" in voice_data:
+        kelime = voice_data.split("oynat", maxsplit=1)
+        oge = kelime[0]
+        pywhatkit.playonyt(oge)
 
     if "ekran görüntüsü al" in voice_data:
         ekran_goruntusu = pyautogui.screenshot()
